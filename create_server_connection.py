@@ -11,3 +11,5 @@ def create_server_connection(host_name, user_name, user_password):
         print(f"Error: '{err}'")
 
     return connection
+
+connection = create_server_connection("local host", "root", pw)
