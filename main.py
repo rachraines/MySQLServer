@@ -60,6 +60,7 @@ def execute_query(connection, query):
     except Error as err:
         print(f"Error: '{err}'")
 
+# Creating tables
 create_teacher_table = """
 CREATE TABLE IF NOT EXISTS teacher (
     teacher_id INT PRIMARY KEY,
@@ -106,6 +107,40 @@ client INT
 );
 """
 
+# Add many-to-many relationship table bw participant and client
+alter_participant = """
+ALTER TABLE participant
+ADD FOREIGN KEY(client)
+REFERENCES client(client_id)
+ON DELETE SET NULL;
+"""
+
+# Add many-to-many relationship bw course and teacher
+alter_course = """
+ALTER TABLE course
+ADD FOREIGN KEY(teacher)
+REFERENCES teacher(teacher_id)
+ON DELETE SET NULL;
+"""
+
+# Add many-to-many relationship bw course and client
+alter_course_again = """
+ALTER TABLE course
+ADD FOREIGN KEY(client)
+REFERENCES client(client_id)
+ON DELETE SET NULL;
+"""
+
+create_takescourse_table = """
+CREATE TABLE takes_course(
+    participant_id INT,
+    course_id INT,
+    PRIMARY KEY(participant_id, course_id),
+    FOREIGN KEY(participant_id) REFERENCES participant(participant_id) ON DELETE CASCADE,
+    FOREIGN KEY(course_id) REFERENCES course(course_id) ON DELETE CASCADE
+);
+"""
+
 
 def main():
     # Connect to MySql server (no DB yet)
@@ -125,6 +160,10 @@ def main():
     execute_query(db_connection, create_client_table)
     execute_query(db_connection, create_participant_table)
     execute_query(db_connection, create_course_table)
+    execute_query(db_connection, alter_participant)
+    execute_query(db_connection, alter_course)
+    execute_query(db_connection, alter_course_again)
+    execute_query(db_connection, create_takescourse_table)
 
     db_connection.close()
     print("All setup completed successfully.")
