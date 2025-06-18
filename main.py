@@ -60,6 +60,17 @@ def execute_query(connection, query):
     except Error as err:
         print(f"Error: '{err}'")
 
+# Reading data query
+def read_query(connection, query):
+    cursor = connection.cursor()
+    result = None
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+        return result
+    except Error as err:
+        print(f"Error: '{err}'")
+
 # Creating tables
 create_teacher_table = """
 CREATE TABLE IF NOT EXISTS teacher (
@@ -75,7 +86,7 @@ CREATE TABLE IF NOT EXISTS teacher (
 """
 
 create_client_table = """
-CREATE TABLE client(
+CREATE TABLE IF NOT EXISTS client(
     client_id INT PRIMARY KEY,
     client_name VARCHAR(40) NOT NULL,
     address VARCHAR(60) NOT NULL,
@@ -84,7 +95,7 @@ CREATE TABLE client(
     """
 
 create_participant_table = """
-CREATE TABLE participant(
+CREATE TABLE IF NOT EXISTS participant(
 participant_id INT PRIMARY KEY,
 first_name VARCHAR(40) NOT NULL,
 last_name VARCHAR(40) NOT NULL,
@@ -94,7 +105,7 @@ client INT
 """
 
 create_course_table = """
-CREATE TABLE course(
+CREATE TABLE IF NOT EXISTS course(
 course_id INT PRIMARY KEY,
 course_name VARCHAR(40) NOT NULL,
 language VARCHAR(3) NOT NULL,
@@ -132,7 +143,7 @@ ON DELETE SET NULL;
 """
 
 create_takescourse_table = """
-CREATE TABLE takes_course(
+CREATE TABLE IF NOT EXISTS takes_course(
     participant_id INT,
     course_id INT,
     PRIMARY KEY(participant_id, course_id),
@@ -149,6 +160,17 @@ INSERT INTO client VALUES
 (103, 'AutoMaker AG',  '20 Künstlichstraße, 10023 Berlin', 'Auto'),
 (104, 'Banko Bank',  '12 Betrugstraße, 12345 Berlin', 'Banking'),
 (105, 'WeMoveIt GmbH', '138 Arglistweg, 10065 Berlin', 'Logistics');
+"""
+
+# Populate teacher table
+pop_teacher = """
+INSERT INTO teacher VALUES
+(1,  'James', 'Smith', 'ENG', NULL, '1985-04-20', 12345, '+491774553676'),
+(2, 'Stefanie',  'Martin',  'FRA', NULL,  '1970-02-17', 23456, '+491234567890'), 
+(3, 'Steve', 'Wang',  'MAN', 'ENG', '1990-11-12', 34567, '+447840921333'),
+(4, 'Friederike',  'Müller-Rossi', 'DEU', 'ITA', '1987-07-07',  45678, '+492345678901'),
+(5, 'Isobel', 'Ivanova', 'RUS', 'ENG', '1963-05-30',  56789, '+491772635467'),
+(6, 'Niamh', 'Murphy', 'ENG', 'IRI', '1995-09-08',  67890, '+491231231232');
 """
 
 # Populate participant table
@@ -206,12 +228,17 @@ INSERT INTO takes_course VALUES
 (113, 19);
 """
 
+# Queries
+q1 = """
+SELECT * FROM teacher;
+"""
+
 def main():
     # Connect to MySql server (no DB yet)
     connection = create_server_connection(HOST, USER, PASSWORD)
     
     # Create the database if not already present
-    create_database_query = "CREATE DATABASE school"
+    create_database_query = "CREATE DATABASE IF NOT EXISTS school"
     create_database(connection, create_database_query)
 
     # Connect to the new database
@@ -230,11 +257,18 @@ def main():
     execute_query(db_connection, create_takescourse_table)
 
     # Populate tables
+    execute_query(db_connection, pop_teacher)
     execute_query(db_connection, pop_client)
     execute_query(db_connection, pop_participant)
     execute_query(db_connection, pop_course)
     execute_query(db_connection,pop_takescourse)
     
+    # Execute queries
+    results = read_query(db_connection, q1)
+
+    for result in results:
+        print(result)
+
     db_connection.close()
     print("All setup completed successfully.")
 
