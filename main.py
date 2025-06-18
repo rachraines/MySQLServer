@@ -233,6 +233,14 @@ q1 = """
 SELECT * FROM teacher;
 """
 
+q5 = """
+SELECT course.course_id, course.course_name, course.language, client.client_name, client.address
+FROM course
+JOIN client
+ON course.client = client.client_id
+WHERE course.in_school = FALSE;
+"""
+
 def main():
     # Connect to MySql server (no DB yet)
     connection = create_server_connection(HOST, USER, PASSWORD)
@@ -264,7 +272,7 @@ def main():
     execute_query(db_connection,pop_takescourse)
     
     # Execute queries
-    results = read_query(db_connection, q1)
+    results = read_query(db_connection, q5)
 
     for result in results:
         print(result)
