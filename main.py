@@ -272,6 +272,7 @@ def main():
     execute_query(db_connection,pop_takescourse)
     
     # Execute queries
+
     results = read_query(db_connection, q5)
 
     for result in results:
